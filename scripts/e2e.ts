@@ -74,6 +74,20 @@ async function run(): Promise<void> {
     assertTrue(data.client_reference_id === orderId, 'client_reference_id mismatch');
   });
 
+  await runner.run('invoiceList', async () => {
+    const result = await client.getInvoiceList({
+      client_reference_id: orderId,
+      limit: 20,
+      offset: 0,
+      sort_by: 'created_at',
+      sort_order: 'desc',
+    });
+    const data = result.data as { items?: Array<{ client_reference_id?: string }>; total?: number };
+    assertTrue(Array.isArray(data.items), 'invoiceList items must be an array');
+    assertTrue((data.total ?? 0) >= 1, 'invoiceList total must be >= 1');
+    assertTrue(data.items?.some((item) => item.client_reference_id === orderId) === true, 'invoiceList missing created invoice');
+  });
+
   await runner.run('invoiceSearch', async () => {
     const result = await client.searchInvoices(orderId);
     const data = result.data as Array<unknown>;

@@ -66,6 +66,22 @@ const { data } = await client.getInvoice(invoiceId);
 console.log(data);
 ```
 
+### Список инвойсов — `GET /invoices`
+
+```ts
+const { data } = await client.getInvoiceList({
+  status: 'paid_all',
+  client_reference_id: 'order',
+  created_at_from: 1700000000,
+  created_at_to: 1700003600,
+  sort_by: 'created_at',
+  sort_order: 'desc',
+  limit: 20,
+  offset: 0,
+});
+console.log(data.items, data.total);
+```
+
 ### Поиск инвойсов — `GET /invoice?query=`
 
 ```ts
