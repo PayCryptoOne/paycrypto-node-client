@@ -4,6 +4,8 @@ import type {
   ConfirmInvoicePayload,
   CreateInvoicePayload,
   CreateWidgetPayload,
+  InvoiceListQuery,
+  InvoiceListResult,
   PayCryptoClientOptions,
 } from './types.js';
 
@@ -48,6 +50,10 @@ export class PayCryptoClient {
     return this.request('GET', `invoice/${id}`);
   }
 
+  async getInvoiceList(query: InvoiceListQuery = {}): Promise<ApiEnvelope<InvoiceListResult>> {
+    return this.request('GET', this.buildPathWithQuery('invoices', query)) as Promise<ApiEnvelope<InvoiceListResult>>;
+  }
+
   async searchInvoices(query: string): Promise<ApiEnvelope<unknown>> {
     return this.request('GET', `invoice?query=${encodeURIComponent(query)}`);
   }
@@ -81,6 +87,16 @@ export class PayCryptoClient {
     const payload = buildSignedPayload(body, this.publicKey);
     headers.signature = computeSignature(payload, this.privateKey);
     return headers;
+  }
+
+  private buildPathWithQuery(path: string, query: InvoiceListQuery): string {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value === undefined || value === null) continue;
+      params.set(key, String(value));
+    }
+    const queryString = params.toString();
+    return queryString ? `${path}?${queryString}` : path;
   }
 
   private async request(
